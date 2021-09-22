@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import noteService from "./services/serv";
-import axios from "axios";
+
 import "./index.css";
 const Error = ({ message }) => {
   if (message === null) {
@@ -33,7 +33,10 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filterData, setFilterData] = useState(persons);
-  const found = persons.some((el) => el.name === newName);
+  const found = persons.find(
+    (el) => el.name.toLowerCase() === newName.toLowerCase()
+  );
+  const Nfound = persons.find((el) => el.number === newNumber);
 
   useEffect(() => {
     noteService.getAll().then((response) => {
@@ -51,18 +54,25 @@ const App = () => {
       id: persons.length + 1,
     };
 
-    found
-      ? window.alert("NAME ALREADY EXIST")
-      : noteService.create(personObject).then((response) => {
-          setPersons(persons.concat(response.data));
-          setFilterData(persons.concat(response.data));
-          setNewName("");
-          setNewNumber("");
-          setnotificatioMessage(` person: ${newName} was added correctly`);
-          setTimeout(() => {
-            setnotificatioMessage(null);
-          }, 5000);
-        });
+    if (Nfound && found) {
+      window.alert("Both name and Number are already in your phonebook");
+    } else if (!Nfound && found) {
+      if (window.confirm("Maybe update number?")) {
+        const pers = persons.find((p) => p.name === newName);
+        updatePerson(pers.id);
+      }
+    } else {
+      noteService.create(personObject).then((response) => {
+        setPersons(persons.concat(response.data));
+        setFilterData(persons.concat(response.data));
+        setNewName("");
+        setNewNumber("");
+        setnotificatioMessage(` person: ${newName} was added correctly`);
+        setTimeout(() => {
+          setnotificatioMessage(null);
+        }, 5000);
+      });
+    }
   };
 
   const handlNameChange = (e) => {
@@ -90,7 +100,6 @@ const App = () => {
   };
 
   const deletePersonOf = (id) => {
-    const url = `http://localhost:3001/persons/${id}`;
     const person = persons.find((p) => p.id === id);
     if (window.confirm(`Do you really want to delete? ${person.name}`)) {
       noteService
@@ -111,6 +120,21 @@ const App = () => {
           }, 5000);
         });
     }
+  };
+
+  const updatePerson = (id) => {
+    const person = persons.find((p) => p.id === id);
+    console.log(person);
+    const personObject = {
+      name: person.name,
+      number: newNumber,
+      id: person.id,
+    };
+    noteService.update(id, personObject).then((response) => {
+      setFilterData(
+        persons.map((p) => (p.id !== person.id ? p : response.data))
+      );
+    });
   };
 
   const Show = ({ persons, deletePerson }) => {

@@ -3,7 +3,7 @@ import axios from "axios";
 
 function App() {
   const [countries, SetCountries] = useState([]);
-  const [filteredData, setFilteredData] = useState(countries);
+  const [filteredData, setFilteredData] = useState([]);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -13,7 +13,6 @@ function App() {
       .then((response) => {
         console.log("promise fulfilled");
         SetCountries(response.data);
-        setFilteredData(response.data);
       })
       .catch((error) => {
         console.log("Error" + error);
@@ -27,15 +26,17 @@ function App() {
     result = countries.filter((data) => {
       return data.name.toLowerCase().indexOf(value) !== -1;
     });
-    setFilteredData(result);
     if (result.length > 10) {
       console.log("Ghawad");
       setMessage("Too many matches, specify another filter");
+      setFilteredData([]);
     } else if (result.length < 10 && result.length > 1) {
       console.log("Not Ghawad");
+      setFilteredData(result);
       setMessage("Your filtered results");
     } else if (result.length === 1) {
       setMessage("only one:");
+      setFilteredData(result);
     }
   };
 
