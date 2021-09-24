@@ -1,9 +1,0 @@
- 
- POST http://localhost:3001/api/persons
- content-Type:application/json
- 
- {     
-     "name":"Antdsadssdonio ",
-     "number":"34113411345534345"
- }
-

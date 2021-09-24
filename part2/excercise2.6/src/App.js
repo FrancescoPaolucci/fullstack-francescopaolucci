@@ -60,18 +60,29 @@ const App = () => {
       if (window.confirm("Maybe update number?")) {
         const pers = persons.find((p) => p.name === newName);
         updatePerson(pers.id);
-      }
-    } else {
-      noteService.create(personObject).then((response) => {
-        setPersons(persons.concat(response.data));
-        setFilterData(persons.concat(response.data));
         setNewName("");
         setNewNumber("");
-        setnotificatioMessage(` person: ${newName} was added correctly`);
-        setTimeout(() => {
-          setnotificatioMessage(null);
-        }, 5000);
-      });
+      }
+    } else {
+      noteService
+        .create(personObject)
+        .then((response) => {
+          setPersons(persons.concat(response.data));
+          setFilterData(persons.concat(response.data));
+          setNewName("");
+          setNewNumber("");
+          setnotificatioMessage(` person: ${newName} was added correctly`);
+          setTimeout(() => {
+            setnotificatioMessage(null);
+          }, 5000);
+        })
+        .catch((error) => {
+          setErrorMessage(error.response.data.error);
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 5000);
+          console.log(error.response.data.error);
+        });
     }
   };
 
@@ -115,6 +126,8 @@ const App = () => {
         })
         .catch((error) => {
           setErrorMessage(`person: ${person.name} was already deleted`);
+          const persond = persons.filter((p) => p.id !== id);
+          setFilterData(persond);
           setTimeout(() => {
             setErrorMessage(null);
           }, 5000);
